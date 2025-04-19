@@ -1,0 +1,68 @@
+server:
+  port: 8081
+  servlet:
+    contextPath: /userservice
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#  instance:
+#    hostname: localhost
+#    leaseRenewalIntervalInSeconds: 10
+#    statusPageUrlPath: /swagger-ui/index.html
+#    metadataMap:
+#      instanceId: ${spring.application.name}:${spring.application.instance_id:${server.port}}
+
+spring:
+  application:
+    name: user-service
+  main:
+#    web-application-type: reactive
+    allow-bean-definition-overriding: true
+#  zipkin:
+#    base-url: ${SPRING_ZIPKIN_BASE_URL:http://localhost:9411/}
+  config:
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:http://localhost:8888}
+
+
+
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        minimumNumberOfCalls: 5
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        eventConsumerBufferSize: 10
+        registerHealthIndicator: true
+  retry:
+    instances:
+      remittance-service:
+        maxAttempts: 3
+        waitDuration: 1s
+  timelimiter:
+    instances:
+      remittance-service:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+
+
+
+
+
+
